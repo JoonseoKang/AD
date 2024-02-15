@@ -49,10 +49,6 @@ def load_data(dl, config):
 
 if __name__ == "__main__":
     dl = DataLoader()
-    # problem = "2023-07-15 16:11:00"
-    # problem_datetime = datetime.strptime(problem, "%Y-%m-%d %H:%M:%S")
-    # start_time = problem_datetime - timedelta(days=90)
-    # end_time = problem_datetime + timedelta(days=90)
 
     config = {
         "site": "eswa",
@@ -61,11 +57,30 @@ if __name__ == "__main__":
         "equipment": "01",
         "number": 4,
         "start_time": "2023-04-15 00:00:00",
-        "end_time": "2023-07-11 00:00:00",
+        "end_time": "2023-07-17 00:00:00",
         "data_shift_ind": 60,
     }
 
-    data_dict = load_data(dl, config)
+    # Convert start_time and end_time to datetime objects
+    start_time = datetime.strptime(config["start_time"], "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(config["end_time"], "%Y-%m-%d %H:%M:%S")
+
+    # Iterate over each day from start_time to end_time
+    current_time = start_time
+    while current_time <= end_time:
+        # Set start_time and end_time to the current day and the next day
+        config["start_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        config["end_time"] = (current_time + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Call load_data and store the result in data_dict
+        data_dict = load_data(dl, config)
+
+        # Open a pickle file named with the current day and dump data_dict into it
+        with open(f'/home/joonseo/AD/data/raw/15_1_4_{current_time.strftime("%m%d")}.pkl', 'wb') as f:
+            pickle.dump(data_dict, f)
+
+        # Move to the next day
+        current_time += timedelta(days=1)
     
-    with open('15_1_4_data_dict.pkl', 'wb') as f:
-        pickle.dump(data_dict, f)
+        
+        
